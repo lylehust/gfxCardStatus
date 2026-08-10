@@ -22,17 +22,17 @@ already works on Sequoia. The changes are build configuration plus tooling.
 
 - **`MARKETING_VERSION` 2.5 → 2.6**
 
-- **Release code signing → `Developer ID Application` (team `QQ4D4HFJH4`)**
+- **Release code signing → local `Developer ID Application` certificate**
 
   Previously the Release config referenced `Apple Development` /
   `DEVELOPMENT_TEAM = LF22FTQC25` (the upstream author's certificate), which is
-  not available on this machine and prevented Release builds. Now uses the
+  not available on this machine and prevented Release builds. Now uses a
   local Developer ID certificate. Signing is Manual style.
 
   Note: the Xcode-produced signature was not notarization-ready (injected
   `get-task-allow`, no secure timestamps, Sparkle's nested `Autoupdate.app` /
   `fileop` left ad-hoc). For distribution the bundle must be re-signed
-  inside-out first — see `script/notarize` below.
+  inside-out first — see the notarization section below.
 
 ### 2. `gfxCardStatus-Info.plist`
 
@@ -42,17 +42,18 @@ already works on Sequoia. The changes are build configuration plus tooling.
 
 - Added credit line: `macOS 15 (Sequoia) compatibility updates by Ye Liu.`
 
-### 4. `script/notarize` (new)
+### 4. Notarization tooling (local only)
 
-One-shot notarization script wrapping `xcrun notarytool`:
+Notarization is done with a small local helper script (kept out of version
+control, in `script/`) that wraps `xcrun notarytool`:
 
 - Submits an artifact (`.dmg` / `.pkg` / `.app` / `.zip`) for notarization
-  using the App Store Connect API key (`--wait`).
+  using an App Store Connect API key (`--wait`).
 - Parses the JSON result; on rejection prints `notarytool log` details.
 - Staples the ticket and validates it (for `.zip`: staples the `.app` inside,
   then re-zips).
-- Credentials default to this machine's key but can be overridden via
-  `NOTARY_KEY` / `NOTARY_KEY_ID` / `NOTARY_ISSUER`.
+- Credentials are supplied via environment variables at runtime; no secrets
+  are stored in the repository.
 
 ## Verification (on the target machine, macOS 15.7.8 x86_64)
 
@@ -64,7 +65,7 @@ One-shot notarization script wrapping `xcrun notarytool`:
   graceful quit restores dynamic switching.
 - `NSUserNotification` delivery confirmed working on Sequoia.
 - `build/gfxCardStatus-2.6.dmg` (app + `/Applications` symlink):
-  - signed with `Developer ID Application: Ye Liu (QQ4D4HFJH4)`
+  - signed with a local `Developer ID Application` certificate
   - notarized: **Accepted**
   - stapled: `stapler validate` passes
   - Gatekeeper: `spctl --assess` → `accepted (Notarized Developer ID)`
@@ -77,7 +78,11 @@ One-shot notarization script wrapping `xcrun notarytool`:
 ## Usage
 
 ```bash
-# build (Release), then:
+# build (Release):
+xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
+    -configuration Release build
+
+# notarize + staple the DMG (helper script is local, in script/):
 ./script/notarize build/gfxCardStatus-2.6.dmg
 ```
 
