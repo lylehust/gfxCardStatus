@@ -22,12 +22,14 @@ already works on Sequoia. The changes are build configuration plus tooling.
 
 - **`MARKETING_VERSION` 2.5 → 2.6**
 
-- **Release code signing → local `Developer ID Application` certificate**
+- **Release code signing → ad-hoc (Manual), local re-signing for distribution**
 
   Previously the Release config referenced `Apple Development` /
-  `DEVELOPMENT_TEAM = LF22FTQC25` (the upstream author's certificate), which is
-  not available on this machine and prevented Release builds. Now uses a
-  local Developer ID certificate. Signing is Manual style.
+  `DEVELOPMENT_TEAM` (the upstream author's certificate), which is not
+  available on this machine and prevented Release builds. Now the project uses
+  ad-hoc signing (no personal signing identity in the repository); the final
+  artifact is re-signed locally with a `Developer ID Application` certificate
+  before packaging (see the notarization section below).
 
   Note: the Xcode-produced signature was not notarization-ready (injected
   `get-task-allow`, no secure timestamps, Sparkle's nested `Autoupdate.app` /
