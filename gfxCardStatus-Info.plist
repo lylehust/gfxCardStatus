@@ -29,7 +29,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2010-2020 Cody Krieger and contributors.</string>
+	<string>Copyright © 2010-2026 Cody Krieger, Ye Liu and contributors.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
