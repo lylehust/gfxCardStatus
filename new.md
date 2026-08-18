@@ -75,9 +75,9 @@ control, in `script/`) that wraps `xcrun notarytool`:
 
 ## Artifacts
 
-- `build/gfxCardStatus-2.7.dmg` — Developer ID-signed; notarization pending
-  (see the v2.7 section below).
-- `/Applications/gfxCardStatus.app` — installed, Developer ID-signed build.
+- `build/gfxCardStatus-2.7.dmg` — **notarized + stapled**, ready to distribute.
+- `/Applications/gfxCardStatus.app` — installed, Developer ID-signed,
+  notarization ticket stapled.
 
 ## Usage
 
@@ -165,8 +165,13 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
   "unsupported machine" alert and waits — expected graceful behavior.
 - Fresh `build/gfxCardStatus-2.7.dmg` (app + `/Applications` symlink), CRC
   verified; inner app signature valid. Old 2.6 DMG removed.
-- Notarization still pending (API key not available at the default path):
-  `./script/notarize build/gfxCardStatus-2.7.dmg` once the key is in place.
+- **Notarized + stapled**: `notarytool` submission
+  `<submission-id>` → **Accepted**; ticket stapled to the
+  DMG and to `/Applications/gfxCardStatus.app`; `spctl --assess` on the app →
+  `accepted (Notarized Developer ID)`.
+- `script/notarize` JSON parsing hardened (notarytool prints a cache-warning
+  line before the JSON on this Xcode; the script now extracts the JSON object
+  instead of parsing the whole stream).
 
 ## 2026-08-17 — Cleanup round
 
