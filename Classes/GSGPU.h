@@ -29,9 +29,4 @@ typedef enum {
 // What it says.
 + (void)registerForGPUChangeNotifications:(id<GSGPUDelegate>)object;
 
-// Fires off the display change notification manually in order to trigger menu
-// changes, notifications, etc. when we otherwise wouldn't receive a display
-// change notification that we want.
-+ (void)fireManualChangeNotification;
-
 @end

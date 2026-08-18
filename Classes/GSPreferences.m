@@ -8,17 +8,9 @@
 
 #import "GSPreferences.h"
 #import "GSStartup.h"
-#import "GSGPU.h"
-
-// Unfortunately this value needs to stay misspelled unless there is a desire to
-// migrate it to a correctly spelled version instead, since getting and setting
-// the existing preferences depend on it.
-#define kPowerSourceBasedSwitchingACMode        @"GPUSetting_ACAdaptor"
-#define kPowerSourceBasedSwitchingBatteryMode   @"GPUSetting_Battery"
 
 #define kShouldStartAtLoginKey                  @"shouldStartAtLogin"
 #define kShouldCheckForUpdatesOnStartupKey      @"shouldCheckForUpdatesOnStartup"
-#define kShouldUsePowerSourceBasedSwitchingKey  @"shouldUsePowerSourceBasedSwitching"
 #define kShouldUseSmartMenuBarIconsKey          @"shouldUseSmartMenuBarIcons"
 
 // This used to be called "shouldGrowl"
@@ -96,14 +88,7 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
     _prefsDict[kShouldCheckForUpdatesOnStartupKey] = @YES;
     _prefsDict[kShouldStartAtLoginKey] = @YES;
     _prefsDict[kShouldDisplayNotificationsKey] = @YES;
-    _prefsDict[kShouldUsePowerSourceBasedSwitchingKey] = @NO;
     _prefsDict[kShouldUseSmartMenuBarIconsKey] = @NO;
-    
-    _prefsDict[kPowerSourceBasedSwitchingBatteryMode] = @(GSPowerSourceBasedSwitchingModeIntegrated);
-    if ([GSGPU isLegacyMachine])
-        _prefsDict[kPowerSourceBasedSwitchingACMode] = @(GSPowerSourceBasedSwitchingModeDiscrete);
-    else
-        _prefsDict[kPowerSourceBasedSwitchingACMode] = @(GSPowerSourceBasedSwitchingModeDynamic);
     
     [self savePreferences];
 }
@@ -149,24 +134,9 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
     return [_prefsDict[kShouldDisplayNotificationsKey] boolValue];
 }
 
-- (BOOL)shouldUsePowerSourceBasedSwitching
-{
-    return [_prefsDict [kShouldUsePowerSourceBasedSwitchingKey] boolValue];
-}
-
 - (BOOL)shouldUseSmartMenuBarIcons
 {
     return [_prefsDict[kShouldUseSmartMenuBarIconsKey] boolValue];
-}
-
-- (GSPowerSourceBasedSwitchingMode)modeForACAdapter
-{
-    return [_prefsDict[kPowerSourceBasedSwitchingACMode] intValue];
-}
-
-- (GSPowerSourceBasedSwitchingMode)modeForBattery
-{
-    return [_prefsDict[kPowerSourceBasedSwitchingBatteryMode] intValue];
 }
 
 #pragma mark - NSWindowDelegate protocol

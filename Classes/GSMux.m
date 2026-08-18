@@ -401,16 +401,6 @@ static void dumpState(io_connect_t connect)
     return policy == kOldStyleSwitchPolicyValue;
 }
 
-- (BOOL)isOnIntegratedOnlyMode
-{
-    return self.isUsingIntegratedGPU && (self.isUsingOldStyleSwitchPolicy || [GSGPU is2010MacBookPro]);
-}
-
-- (BOOL)isOnDiscreteOnlyMode
-{
-    return self.isUsingDiscreteGPU && (self.isUsingOldStyleSwitchPolicy || [GSGPU is2010MacBookPro]);
-}
-
 @end
 
 @interface _GSMuxMockImpl : GSMux<GSMuxProtocol>
@@ -450,16 +440,6 @@ static void dumpState(io_connect_t connect)
 - (BOOL)isUsingOldStyleSwitchPolicy
 {
     return NO;
-}
-
-- (BOOL)isOnIntegratedOnlyMode
-{
-    return self.isUsingIntegratedGPU && (self.isUsingOldStyleSwitchPolicy || [GSGPU is2010MacBookPro]);
-}
-
-- (BOOL)isOnDiscreteOnlyMode
-{
-    return self.isUsingDiscreteGPU && (self.isUsingOldStyleSwitchPolicy || [GSGPU is2010MacBookPro]);
 }
 
 @end

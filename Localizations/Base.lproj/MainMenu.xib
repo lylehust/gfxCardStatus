@@ -679,9 +679,6 @@
                 <menuItem title="currentCard" id="653">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
-                <menuItem title="currentPowerSource" hidden="YES" id="807">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                </menuItem>
                 <menuItem isSeparatorItem="YES" id="722"/>
                 <menuItem title="SwitchGPUs" hidden="YES" id="723">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -736,7 +733,6 @@
         <customObject id="850" customClass="GSMenuController">
             <connections>
                 <outlet property="currentCard" destination="653" id="851"/>
-                <outlet property="currentPowerSource" destination="807" id="852"/>
                 <outlet property="dependentProcesses" destination="712" id="862"/>
                 <outlet property="discreteOnly" destination="759" id="853"/>
                 <outlet property="dynamicSwitching" destination="760" id="854"/>

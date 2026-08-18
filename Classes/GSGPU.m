@@ -233,11 +233,4 @@ static void _displayReconfigurationCallback(CGDirectDisplayID display, CGDisplay
     CGDisplayRegisterReconfigurationCallback(_displayReconfigurationCallback, NULL);
 }
 
-+ (void)fireManualChangeNotification
-{
-    if (!_notificationQueue)
-        return; // Not registered yet; nothing to fire.
-    _displayReconfigurationCallback(CGMainDisplayID(), kCGDisplaySetModeFlag, NULL);
-}
-
 @end

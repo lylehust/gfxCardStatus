@@ -17,6 +17,7 @@
 "DynamicSwitching"		= "Dynamic Switching";
 "Dependencies"			= "Dependencies";
 "NoProcess"				= "None";
+"External Display"		= "External Display";
 "Quit"					= "Quit";
 "Close"					= "Cool!";
 "PowerSource"           = "Power Source: %%";

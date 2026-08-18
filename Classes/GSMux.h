@@ -28,9 +28,6 @@ typedef enum {
 // switching policy or not. We kick machines into said policy when we switch to
 // Integrated Only or Discrete Only for reliability and consistency purposes.
 - (BOOL)isUsingOldStyleSwitchPolicy;
-
-- (BOOL)isOnIntegratedOnlyMode;
-- (BOOL)isOnDiscreteOnlyMode;
 @end
 
 @interface GSMux : NSObject

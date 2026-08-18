@@ -93,7 +93,6 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
 - Intermittent `0xe00002bc` (`kIOReturnError`) on one AGC policy call during
   forced switching is pre-existing driver behavior; it does not block switching
   (matches upstream issues #349/#368/#377).
-- Pods (CocoaPods-generated, deployment target 10.9) produce harmless warnings.
 - If distributing outside this machine, re-signing the app bundle with
   `--timestamp --options runtime` and empty entitlements is required before
   packaging (see the notarization notes above).
@@ -130,9 +129,10 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
   `savePreferences`; the General prefs checkboxes now wire target/action in
   `loadView` so toggles persist + apply side effects immediately
   (`loadAtStartup`, updater sync, menu icon refresh).
-  Note: the RAC pod itself is still in Pods/ (no CocoaPods on this machine);
-  once `pod` is available: remove the `pod 'ReactiveCocoa'` line from the
-  Podfile (and bump `platform :osx, '10.13'`), then run `pod install`.
+  **CocoaPods fully removed**: Podfile/Podfile.lock/Pods/ deleted, pod build
+  phases + xcconfigs stripped from the project, Pods.xcodeproj dropped from the
+  workspace (manual de-integration — no CocoaPods on this machine). Debug +
+  Release build cleanly with zero pod warnings.
 - **IORegistry hardening** (GSGPU.m `getGPUNames`): missing/typed `model`
   values no longer crash (`addObject:nil` → exception) — model data is read up
   to its NUL terminator, bounded by buffer length; `io_iterator_t` and each
@@ -151,3 +151,20 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
   (Xcode 26.6); built app reports CFBundleShortVersionString 2.6.
 - Runtime behavior (GPU switching, login item, notifications) still needs a
   smoke test on the target machine (macOS 15.7.8 / OCLP 2013 MBP).
+
+## 2026-08-17 — Cleanup round
+
+- **CocoaPods fully removed** (see above): no more RAC 1.x in the build, no pod
+  build phases, no deployment-target warnings.
+- Dead code removed: `fireManualChangeNotification`, `isOnIntegratedOnlyMode` /
+  `isOnDiscreteOnlyMode` (GSMux protocol + both impls), `menuIsOpen` and its
+  delegate handlers, the hidden `currentPowerSource` menu item (code + MainMenu
+  xib), the removed-feature power-source-based switching preference APIs
+  (`shouldUsePowerSourceBasedSwitching`, `modeForACAdapter`/`modeForBattery`,
+  `GPUSetting_*` keys, `GSPowerSourceBasedSwitchingMode`), unused
+  `yesNumber`/`noNumber` ivars, and an `NSButton*` cast over NSMenuItems in
+  `_localizeMenu`.
+- `"External Display"` added to en.lproj/Localizable.strings (was falling back
+  to the raw key; other locales keep the fallback until translated).
+- Verified: Debug + Release **BUILD SUCCEEDED**, app binary contains zero
+  `rac_*` symbols and no ReactiveCocoa files in the bundle.

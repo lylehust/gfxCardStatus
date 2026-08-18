@@ -32,7 +32,6 @@
 @synthesize quitItem;
 @synthesize visitWebsiteItem;
 @synthesize currentCard;
-@synthesize currentPowerSource;
 @synthesize switchGPUs;
 @synthesize integratedOnly;
 @synthesize discreteOnly;
@@ -40,8 +39,6 @@
 @synthesize processesSeparator;
 @synthesize dependentProcesses;
 @synthesize processList;
-
-@synthesize menuIsOpen;
 
 #pragma mark - Initializers
 
@@ -216,16 +213,6 @@
     [self _updateProcessList];
 }
 
-- (void)menuWillOpen:(NSMenu *)menu
-{
-    self.menuIsOpen = YES;
-}
-
-- (void)menuDidClose:(NSMenu *)menu
-{
-    self.menuIsOpen = NO;
-}
-
 @end
 
 @implementation GSMenuController (Internal)
@@ -245,7 +232,7 @@
                           quitItem, switchGPUs, integratedOnly, discreteOnly, 
                           dynamicSwitching, dependentProcesses, processList, 
                           nil];
-    for (NSButton *loc in localized)
+    for (NSMenuItem *loc in localized)
         [loc setTitle:Str([loc title])];
 }
 

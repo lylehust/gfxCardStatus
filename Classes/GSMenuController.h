@@ -27,7 +27,6 @@
 @property (weak) IBOutlet NSMenuItem *visitWebsiteItem;
 
 @property (weak) IBOutlet NSMenuItem *currentCard;
-@property (weak) IBOutlet NSMenuItem *currentPowerSource;
 @property (weak) IBOutlet NSMenuItem *switchGPUs;
 @property (weak) IBOutlet NSMenuItem *integratedOnly;
 @property (weak) IBOutlet NSMenuItem *discreteOnly;
@@ -37,8 +36,6 @@
 @property (weak) IBOutlet NSMenuItem *processesSeparator;
 @property (weak) IBOutlet NSMenuItem *dependentProcesses;
 @property (weak) IBOutlet NSMenuItem *processList;
-
-@property BOOL menuIsOpen;
 
 - (void)setupMenu;
 - (void)updateMenu;

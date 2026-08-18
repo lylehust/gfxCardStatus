@@ -13,17 +13,8 @@
 // that a preference changed).
 extern NSString * const GSPreferencesDidChangeNotification;
 
-typedef enum {
-    GSPowerSourceBasedSwitchingModeIntegrated = 0,
-    GSPowerSourceBasedSwitchingModeDiscrete = 1,
-    GSPowerSourceBasedSwitchingModeDynamic = 2
-} GSPowerSourceBasedSwitchingMode;
-
 @interface GSPreferences : NSObject <NSWindowDelegate> {
     NSMutableDictionary *_prefsDict;
-    
-    NSNumber *yesNumber;
-    NSNumber *noNumber;
 }
 
 @property (strong) NSMutableDictionary *prefsDict;
@@ -35,10 +26,7 @@ typedef enum {
 - (BOOL)shouldCheckForUpdatesOnStartup;
 - (BOOL)shouldStartAtLogin;
 - (BOOL)shouldDisplayNotifications;
-- (BOOL)shouldUsePowerSourceBasedSwitching;
 - (BOOL)shouldUseSmartMenuBarIcons;
-- (GSPowerSourceBasedSwitchingMode)modeForACAdapter;
-- (GSPowerSourceBasedSwitchingMode)modeForBattery;
 
 - (void)setBool:(BOOL)value forKey:(NSString *)key;
 - (BOOL)boolForKey:(NSString *)key;
