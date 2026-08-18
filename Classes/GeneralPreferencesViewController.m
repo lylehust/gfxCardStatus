@@ -11,14 +11,12 @@
 #import "GSPreferences.h"
 #import "GSStartup.h"
 #import "GSGPU.h"
-#import <ReactiveCocoa/ReactiveCocoa.h>
 
 #define kGeneralPreferencesName         @"General"
 
-#define kShouldStartAtLoginKeyPath      @"prefsDict.shouldStartAtLogin"
-
 @interface GeneralPreferencesViewController (Internal)
 - (BOOL)isLegacyMachine;
+- (IBAction)prefCheckboxChanged:(id)sender;
 @end
 
 @implementation GeneralPreferencesViewController
@@ -47,19 +45,26 @@
 {
     [super loadView];
 
-    // FIXME: Rip out ReactiveCocoa.
-
-    // Add or remove the app from the current user's Login Items upon hearing
-    // from our awesome friend Josh Abernathy at GitHub that the value we're
-    // subscribed to has changed.
-    [[prefs rac_signalForKeyPath:kShouldStartAtLoginKeyPath observer:self] subscribeNext:^(id x) {
-        GSLogDebug(@"Start at login value changed: %@", x);
-        [GSStartup loadAtStartup:[x boolValue]];
-    }];
+    // The checkboxes are bound to prefs.prefsDict, so toggling one mutates
+    // the dictionary without any notification. Wire up a target/action so we
+    // can persist the change and apply its side effects right away.
+    for (NSButton *checkbox in @[prefChkStartup, prefChkUpdate, prefChkSmartIcons, prefChkGrowl]) {
+        checkbox.target = self;
+        checkbox.action = @selector(prefCheckboxChanged:);
+    }
     
     NSArray *localizedButtons = [[NSArray alloc] initWithObjects:prefChkStartup, prefChkUpdate, prefChkSmartIcons, prefChkGrowl, nil];
     for (NSButton *loc in localizedButtons)
         [loc setTitle:Str([loc title])];
+}
+
+- (IBAction)prefCheckboxChanged:(id)sender
+{
+    // The binding has already written the new value into prefsDict; persist it
+    // (which also posts GSPreferencesDidChangeNotification so the menu bar icon
+    // and the updater refresh) and apply the start-at-login side effect now.
+    [prefs savePreferences];
+    [GSStartup loadAtStartup:prefs.shouldStartAtLogin];
 }
 
 #pragma mark - Passthrough properties

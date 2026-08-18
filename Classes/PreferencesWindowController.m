@@ -66,7 +66,7 @@
     if (toolbar) {
         NSInteger index = toolbar.items.count - 1;
         
-        while (index > 0)
+        while (index >= 0)
             [toolbar removeItemAtIndex:index--];
         
         // Add the new items.

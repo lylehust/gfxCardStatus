@@ -133,22 +133,22 @@ static BOOL setFeatureInfo(io_connect_t connect, muxFeature feature, BOOL enable
     return setMuxState(connect, enabled ? muxEnableFeature : muxDisableFeature, 1<<feature);
 }
 
-static void setSwitchPolicy(io_connect_t connect, BOOL dynamic)
+static BOOL setSwitchPolicy(io_connect_t connect, BOOL dynamic)
 {
     // arg = 2: user needs to logout before switching, arg = 0: instant switching
-    setMuxState(connect, muxSwitchPolicy, dynamic ? kNewStyleSwitchPolicyValue : kOldStyleSwitchPolicyValue);
+    return setMuxState(connect, muxSwitchPolicy, dynamic ? kNewStyleSwitchPolicyValue : kOldStyleSwitchPolicyValue);
 }
 
-static void setDynamicSwitchingEnabled(io_connect_t connect, BOOL enabled)
+static BOOL setDynamicSwitchingEnabled(io_connect_t connect, BOOL enabled)
 {
     // The same as clicking the checkbox in systemsettings.app
-    setMuxState(connect, muxGpuSelect, enabled ? 1 : 0);
+    return setMuxState(connect, muxGpuSelect, enabled ? 1 : 0);
 }
 
-static void forceSwitch(io_connect_t connect)
+static BOOL forceSwitch(io_connect_t connect)
 {
     // switch graphic cards now regardless of switching mode
-    setMuxState(connect, muxForceSwitch, 0);
+    return setMuxState(connect, muxForceSwitch, 0);
 }
 
 // --------------------------------------------------------------
@@ -293,12 +293,15 @@ static void dumpState(io_connect_t connect)
     }
     
     kernResult = IOConnectCallScalarMethod(_switcherConnect, kOpen, NULL, 0, NULL, NULL);
-    if (kernResult != KERN_SUCCESS)
+    if (kernResult != KERN_SUCCESS) {
         GSLogDebug(@"IOConnectCallScalarMethod returned 0x%08x.", kernResult);
-    else
-        GSLogDebug(@"Driver connection opened.");
+        IOServiceClose(_switcherConnect);
+        _switcherConnect = IO_OBJECT_NULL;
+        return NO;
+    }
     
-    return kernResult == KERN_SUCCESS;
+    GSLogDebug(@"Driver connection opened.");
+    return YES;
 }
 
 - (void)switcherClose
@@ -325,47 +328,54 @@ static void dumpState(io_connect_t connect)
     
     switch (mode) {
         case GSSwitcherModeForceIntegrated:
-        case GSSwitcherModeForceDiscrete:
+        case GSSwitcherModeForceDiscrete: {
             // Disable dynamic switching
-            setDynamicSwitchingEnabled(_switcherConnect, NO);
+            BOOL ok = setDynamicSwitchingEnabled(_switcherConnect, NO);
             
             // Disable Policy, otherwise gpu switches to Discrete after a bad
             // app closes. Only do this on 2011+ MacBook Pros since 2010 models
             // go nuts when this happens.
             if (![GSGPU is2010MacBookPro]) {
-                setFeatureInfo(_switcherConnect, Policy, NO);
-                setSwitchPolicy(_switcherConnect, NO);
+                ok = setFeatureInfo(_switcherConnect, Policy, NO) && ok;
+                ok = setSwitchPolicy(_switcherConnect, NO) && ok;
             }
             
-            // Hold up a sec!
-            sleep(1);
+            // The actual switch includes a one-second settle delay; run it off
+            // the main thread so the menu bar UI doesn't freeze while waiting.
+            // The menu is updated optimistically (like before), and the display
+            // reconfiguration callback corrects it once the switch completes.
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+                // Hold up a sec!
+                sleep(1);
+                
+                BOOL integrated = self.isUsingIntegratedGPU;
+                if ((mode == GSSwitcherModeForceIntegrated && !integrated)
+                    || (mode == GSSwitcherModeForceDiscrete && integrated))
+                    forceSwitch(_switcherConnect);
+            });
             
-            BOOL integrated = self.isUsingIntegratedGPU;
-            if ((mode == GSSwitcherModeForceIntegrated && !integrated)
-                || (mode == GSSwitcherModeForceDiscrete && integrated))
-                forceSwitch(_switcherConnect);
-            
-            break;
-        case GSSwitcherModeDynamicSwitching:
+            return ok;
+        }
+        case GSSwitcherModeDynamicSwitching: {
             // Set switch policy back, make the MBP think it's an auto switching one once again
-            setFeatureInfo(_switcherConnect, Policy, YES);
-            setSwitchPolicy(_switcherConnect, YES);
+            BOOL ok = setFeatureInfo(_switcherConnect, Policy, YES);
+            ok = setSwitchPolicy(_switcherConnect, YES) && ok;
             
             // Enable dynamic switching
-            setDynamicSwitchingEnabled(_switcherConnect, YES);
+            ok = setDynamicSwitchingEnabled(_switcherConnect, YES) && ok;
             
-            break;
+            return ok;
+        }
         case GSSwitcherModeToggleGPU:
-            forceSwitch(_switcherConnect);
-            break;
+            return forceSwitch(_switcherConnect);
     }
     
-    return YES;
+    return NO;
 }
 
 - (BOOL)isUsingIntegratedGPU
 {
-    uint64_t output;
+    uint64_t output = 0;
     if (_switcherConnect == IO_OBJECT_NULL) return NO;
     getMuxState(_switcherConnect, muxGraphicsCard, &output);
     return output != 0;
@@ -378,7 +388,7 @@ static void dumpState(io_connect_t connect)
 
 - (BOOL)isUsingDynamicSwitching
 {
-    uint64_t output;
+    uint64_t output = 0;
     if (_switcherConnect == IO_OBJECT_NULL) return NO;
     getMuxState(_switcherConnect, muxGpuSelect, &output);
     return output != 0;

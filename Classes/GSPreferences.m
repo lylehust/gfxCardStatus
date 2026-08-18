@@ -28,6 +28,8 @@
 // unreliable. This works all the time, no questions asked.
 #define kPreferencesPlistPath [@"~/Library/Preferences/com.codykrieger.gfxCardStatus-Preferences.plist" stringByExpandingTildeInPath]
 
+NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNotification";
+
 @interface GSPreferences (Internal)
 - (NSString *)_getPrefsPath;
 @end
@@ -114,6 +116,11 @@
         GSLogDebug(@"Successfully wrote preferences to disk.");
     else
         GSLogDebug(@"Failed to write preferences to disk. Permissions problem in ~/Library/Preferences?");
+    
+    // Let interested parties (menu bar icon, updater, login items, ...) know
+    // that the preferences changed so they can re-apply their side effects.
+    [[NSNotificationCenter defaultCenter] postNotificationName:GSPreferencesDidChangeNotification
+                                                        object:self];
 }
 
 - (void)setBool:(BOOL)value forKey:(NSString *)key

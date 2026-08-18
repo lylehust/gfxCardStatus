@@ -14,11 +14,9 @@
 #import "GSNotifier.h"
 #import "GSProcess.h"
 
-#import <ReactiveCocoa/ReactiveCocoa.h>
-
-#define kShouldUseSmartMenuBarIconsKeyPath @"prefsDict.shouldUseSmartMenuBarIcons"
 
 @interface GSMenuController (Internal)
+- (void)_preferencesDidChange:(NSNotification *)note;
 - (void)_localizeMenu;
 - (void)_updateProcessList;
 - (void)_updateMenuBarIconText:(BOOL)isUsingIntegrated cardString:(NSString *)cardString;
@@ -54,13 +52,18 @@
     
     _prefs = [GSPreferences sharedInstance];
 
-    // FIXME: Rip out ReactiveCocoa.
-    [[_prefs rac_signalForKeyPath:kShouldUseSmartMenuBarIconsKeyPath observer:self] subscribeNext:^(id x) {
-        GSLogDebug(@"Use smart menu bar icons value changed: %@", x);
-        [self updateMenu];
-    }];
+    // Refresh the menu bar icon whenever the smart icon preference changes.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_preferencesDidChange:)
+                                                 name:GSPreferencesDidChangeNotification
+                                               object:nil];
     
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - GSMenuController API
@@ -90,6 +93,10 @@
     BOOL isUsingIntegrated = [GSMux defaultMux].isUsingIntegratedGPU;
 
     NSString *gpuString = (isUsingIntegrated ? [GSGPU integratedGPUName] : [GSGPU discreteGPUName]);
+    // Guard against GPU detection returning nothing (e.g. an IORegistry entry
+    // without a "model" property); an empty string would crash the icon code.
+    if (gpuString.length == 0)
+        gpuString = isUsingIntegrated ? Str(@"Integrated") : Str(@"Discrete");
     [self _updateMenuBarIconText:isUsingIntegrated cardString:gpuString];
 
     if (![GSGPU isLegacyMachine]) {
@@ -223,6 +230,12 @@
 
 @implementation GSMenuController (Internal)
 
+- (void)_preferencesDidChange:(NSNotification *)note
+{
+    GSLogDebug(@"Preferences changed, refreshing menu.");
+    [self updateMenu];
+}
+
 - (void)_localizeMenu
 {
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
@@ -281,6 +294,9 @@
 {
     // Grab the first character of GPU string for the menu bar icon.
     unichar firstLetter;
+    
+    if (cardString.length == 0)
+        cardString = @"?"; // GPU name lookup failed; keep the icon sane.
     
     if ([GSGPU isLegacyMachine] || ![_prefs shouldUseSmartMenuBarIcons]) {
         firstLetter = [GSMux defaultMux].isUsingIntegratedGPU ? 'i' : 'd';

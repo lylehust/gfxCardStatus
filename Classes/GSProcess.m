@@ -15,6 +15,7 @@
 #include <IOKit/IOKitLib.h>
 #include <sys/sysctl.h>
 #include <unistd.h>
+#include <string.h>
 
 static const CFStringRef kProcTaskKey = (const CFStringRef)__builtin___CFStringMakeConstantString("task-list");
 
@@ -26,7 +27,6 @@ static size_t _procNum = 0;
 
 static void _procTask(const void *value, void *param) {
     NSMutableArray *arr = (__bridge NSMutableArray *)param;
-    NSNumber *key = NULL;
     NSString *procName = NULL;
     
     int mib[3] = { CTL_KERN, KERN_ARGMAX, 0 };
@@ -52,8 +52,6 @@ static void _procTask(const void *value, void *param) {
     // return if we haven't found a matching service in the kernel task list
     if (k == NULL) return;
     
-    key = [[NSNumber alloc] initWithLongLong:pid];
-    
     sz = sizeof(i);
     if (sysctl(mib, 2, &i, &sz, NULL, 0) == -1)
         goto err;
@@ -76,11 +74,13 @@ static void _procTask(const void *value, void *param) {
     cp = buf + sizeof(int);
     if ((sp = strrchr(cp, '/'))) cp = sp + 1;
     
-    // we finally have the proc name!
-    procName = [[NSString alloc] initWithUTF8String:cp];
+    // we finally have the proc name! Bound the read to the bytes sysctl
+    // actually returned so we can't run past the end of the buffer.
+    size_t available = ((size_t)(cp - buf) < sz) ? (sz - (size_t)(cp - buf)) : 0;
+    procName = [[NSString alloc] initWithBytes:cp length:strnlen(cp, available) encoding:NSUTF8StringEncoding];
     [arr addObject:[NSDictionary dictionaryWithObjectsAndKeys:
                     procName, kTaskItemName,
-                    [key stringValue], kTaskItemPID, nil]];
+                    [@(pid) stringValue], kTaskItemPID, nil]];
     
     free(buf);
     goto done;
@@ -128,10 +128,16 @@ static void _procScan(io_registry_entry_t service, NSMutableArray *arr) {
     if (IOObjectConformsTo(service, "AppleGraphicsControl")) {
         kern_return_t status = IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, kNilOptions);
         
-        if (status == KERN_SUCCESS && CFGetTypeID(props) == CFDictionaryGetTypeID()) {
-            CFTypeRef array = CFDictionaryGetValue(props, kProcTaskKey);
-            CFRange range = { 0, CFArrayGetCount(array) };
-            CFArrayApplyFunction(array, range, _procTask, (__bridge void *)arr);
+        if (status == KERN_SUCCESS && props) {
+            if (CFGetTypeID(props) == CFDictionaryGetTypeID()) {
+                CFTypeRef array = CFDictionaryGetValue(props, kProcTaskKey);
+                // Not every AGC service exposes a task-list; guard against a
+                // missing key so we don't crash on CFArrayGetCount(NULL).
+                if (array && CFGetTypeID(array) == CFArrayGetTypeID()) {
+                    CFRange range = { 0, CFArrayGetCount(array) };
+                    CFArrayApplyFunction(array, range, _procTask, (__bridge void *)arr);
+                }
+            }
             CFRelease(props);
         }
     }

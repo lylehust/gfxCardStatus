@@ -21,4 +21,6 @@
 @property (strong) IBOutlet SUUpdater *updater;
 @property (strong) IBOutlet GSMenuController *menuController;
 
+- (void)_preferencesDidChange:(NSNotification *)note;
+
 @end

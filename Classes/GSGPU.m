@@ -66,7 +66,12 @@ static void _displayReconfigurationCallback(CGDirectDisplayID display, CGDisplay
             GSLogInfo(@"Notification: GPU changed. Integrated? %d", isUsingIntegrated);
             
             GSGPUType activeType = (isUsingIntegrated ? GSGPUTypeIntegrated : GSGPUTypeDiscrete);
-            [_delegate GPUDidChangeTo:activeType];
+            
+            // The delegate updates AppKit UI (menu bar item, user notification),
+            // so hop back to the main thread before calling out.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_delegate GPUDidChangeTo:activeType];
+            });
         });
     }
 }
@@ -84,15 +89,15 @@ static void _displayReconfigurationCallback(CGDirectDisplayID display, CGDisplay
     
     // The IOPCIDevice class includes display adapters/GPUs.
     CFMutableDictionaryRef devices = IOServiceMatching(kIOPCIDevice);
-    io_iterator_t entryIterator;
+    io_iterator_t entryIterator = IO_OBJECT_NULL;
     
     if (IOServiceGetMatchingServices(kIOMasterPortDefault, devices, &entryIterator) == kIOReturnSuccess) {
         io_registry_entry_t device;
         
         while ((device = IOIteratorNext(entryIterator))) {
-            CFMutableDictionaryRef serviceDictionary;
+            CFMutableDictionaryRef serviceDictionary = NULL;
             
-            if (IORegistryEntryCreateCFProperties(device, &serviceDictionary, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
+            if (IORegistryEntryCreateCFProperties(device, &serviceDictionary, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess || serviceDictionary == NULL) {
                 // Couldn't get the properties for this service, so clean up and
                 // continue.
                 IOObjectRelease(device);
@@ -107,13 +112,32 @@ static void _displayReconfigurationCallback(CGDirectDisplayID display, CGDisplay
                 // convert into a string.
                 if (CFGetTypeID(ioName) == CFStringGetTypeID() && CFStringCompare(ioName, CFSTR(kDisplayKey), kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
                     const void *model = CFDictionaryGetValue(serviceDictionary, @kModelKey);
-                    NSString *gpuName = [[NSString alloc] initWithUTF8String:[(__bridge NSData *)model bytes]];
-                    [_cachedGPUs addObject:gpuName];
+                    NSString *gpuName = nil;
+                    
+                    if (model && CFGetTypeID(model) == CFDataGetTypeID()) {
+                        // The model data is NUL-padded; only read up to the
+                        // first NUL (and never past the buffer).
+                        NSData *modelData = (__bridge NSData *)model;
+                        const char *bytes = modelData.bytes;
+                        NSUInteger strLen = 0;
+                        while (strLen < modelData.length && bytes[strLen] != '\0')
+                            strLen++;
+                        gpuName = [[NSString alloc] initWithBytes:bytes length:strLen encoding:NSUTF8StringEncoding];
+                    } else if (model && CFGetTypeID(model) == CFStringGetTypeID()) {
+                        // Some entries expose the model as a string instead.
+                        gpuName = (__bridge NSString *)model;
+                    }
+                    
+                    if (gpuName.length > 0)
+                        [_cachedGPUs addObject:gpuName];
                 }
             }
             
             CFRelease(serviceDictionary);
+            IOObjectRelease(device);
         }
+        
+        IOObjectRelease(entryIterator);
     }
     
     return _cachedGPUs;
@@ -204,12 +228,15 @@ static void _displayReconfigurationCallback(CGDirectDisplayID display, CGDisplay
 + (void)registerForGPUChangeNotifications:(id<GSGPUDelegate>)object
 {
     _delegate = object;
-    _notificationQueue = dispatch_queue_create(kNotificationQueueName, NULL);
+    if (!_notificationQueue)
+        _notificationQueue = dispatch_queue_create(kNotificationQueueName, NULL);
     CGDisplayRegisterReconfigurationCallback(_displayReconfigurationCallback, NULL);
 }
 
 + (void)fireManualChangeNotification
 {
+    if (!_notificationQueue)
+        return; // Not registered yet; nothing to fire.
     _displayReconfigurationCallback(CGMainDisplayID(), kCGDisplaySetModeFlag, NULL);
 }
 

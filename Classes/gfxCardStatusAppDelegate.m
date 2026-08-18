@@ -14,10 +14,7 @@
 #import "GSMux.h"
 #import "GSNotifier.h"
 
-#import <ReactiveCocoa/ReactiveCocoa.h>
-
 #define kHasSeenOneTimeNotificationKey @"hasSeenVersionTwoMessage"
-#define kShouldCheckForUpdatesOnStartupKeyPath @"prefsDict.shouldCheckForUpdatesOnStartup"
 
 @implementation gfxCardStatusAppDelegate
 
@@ -92,15 +89,21 @@
     // automaticallyChecksForUpdates property on the SUUpdater.
     _updater.automaticallyChecksForUpdates = _prefs.shouldCheckForUpdatesOnStartup;
 
-    // FIXME: Rip out ReactiveCocoa.
-    [[_prefs rac_signalForKeyPath:kShouldCheckForUpdatesOnStartupKeyPath observer:self] subscribeNext:^(id x) {
-        GSLogDebug(@"Check for updates on startup value changed: %@", x);
-        self->_updater.automaticallyChecksForUpdates = [x boolValue];
-    }];
+    // Keep the updater in sync when the preference changes.
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(_preferencesDidChange:)
+                                                 name:GSPreferencesDidChangeNotification
+                                               object:nil];
 
     // Check for updates if the user has them enabled.
     if ([_prefs shouldCheckForUpdatesOnStartup])
         [_updater checkForUpdatesInBackground];
+}
+
+- (void)_preferencesDidChange:(NSNotification *)note
+{
+    GSLogDebug(@"Check for updates on startup value changed: %d", _prefs.shouldCheckForUpdatesOnStartup);
+    _updater.automaticallyChecksForUpdates = _prefs.shouldCheckForUpdatesOnStartup;
 }
 
 #pragma mark - Termination Notifications

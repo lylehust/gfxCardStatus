@@ -8,6 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 
+// Posted whenever the preferences dictionary is persisted (GSPreferences
+// doesn't use NSUserDefaults, so this is how the rest of the app finds out
+// that a preference changed).
+extern NSString * const GSPreferencesDidChangeNotification;
+
 typedef enum {
     GSPowerSourceBasedSwitchingModeIntegrated = 0,
     GSPowerSourceBasedSwitchingModeDiscrete = 1,
