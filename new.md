@@ -66,7 +66,8 @@ control, in `script/`) that wraps `xcrun notarytool`:
   `--discrete` → NVIDIA GT 650M (held 30 s), `--integrated` → Intel HD 4000;
   graceful quit restores dynamic switching.
 - `NSUserNotification` delivery confirmed working on Sequoia.
-- `build/gfxCardStatus-2.6.dmg` (app + `/Applications` symlink):
+- `build/gfxCardStatus-2.6.dmg` (the 2.6 artifact, app + `/Applications`
+  symlink — superseded by the 2.7 DMG):
   - signed with a local `Developer ID Application` certificate
   - notarized: **Accepted**
   - stapled: `stapler validate` passes
@@ -74,8 +75,9 @@ control, in `script/`) that wraps `xcrun notarytool`:
 
 ## Artifacts
 
-- `build/gfxCardStatus-2.6.dmg` — notarized, stapled, ready to distribute.
-- `/Applications/gfxCardStatus.app` — locally installed signed build.
+- `build/gfxCardStatus-2.7.dmg` — Developer ID-signed; notarization pending
+  (see the v2.7 section below).
+- `/Applications/gfxCardStatus.app` — installed, Developer ID-signed build.
 
 ## Usage
 
@@ -85,7 +87,7 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
     -configuration Release build
 
 # notarize + staple the DMG (helper script is local, in script/):
-./script/notarize build/gfxCardStatus-2.6.dmg
+./script/notarize build/gfxCardStatus-2.7.dmg
 ```
 
 ## Notes
@@ -151,6 +153,20 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
   (Xcode 26.6); built app reports CFBundleShortVersionString 2.6.
 - Runtime behavior (GPU switching, login item, notifications) still needs a
   smoke test on the target machine (macOS 15.7.8 / OCLP 2013 MBP).
+
+## 2026-08-17 — v2.7
+
+- **`MARKETING_VERSION` 2.6 → 2.7** (Debug + Release).
+- Rebuilt Release, re-signed inside-out with
+  `a local Developer ID Application certificate` (+ hardened runtime,
+  timestamp, empty entitlements); `codesign --verify --deep --strict` passes.
+- Installed to `/Applications/gfxCardStatus.app` and launched (running).
+  On a non-dual-GPU machine (e.g. this Apple M4 dev box) the app shows the
+  "unsupported machine" alert and waits — expected graceful behavior.
+- Fresh `build/gfxCardStatus-2.7.dmg` (app + `/Applications` symlink), CRC
+  verified; inner app signature valid. Old 2.6 DMG removed.
+- Notarization still pending (API key not available at the default path):
+  `./script/notarize build/gfxCardStatus-2.7.dmg` once the key is in place.
 
 ## 2026-08-17 — Cleanup round
 
