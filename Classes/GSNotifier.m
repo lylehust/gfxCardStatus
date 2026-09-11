@@ -78,8 +78,8 @@
     [versionInfo setMessageText:Str(@"ThanksForDownloading")];
     [versionInfo setInformativeText:Str(@"PleaseConsiderDonating")];
     NSTextView *accessory = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 300, 15)];
-    [accessory insertText:[NSAttributedString hyperlinkFromString:kApplicationWebsiteURL
-                                                          withURL:[NSURL URLWithString:kApplicationWebsiteURL]]];
+    accessory.textStorage.attributedString = [NSAttributedString hyperlinkFromString:kApplicationWebsiteURL
+                                                                            withURL:[NSURL URLWithString:kApplicationWebsiteURL]];
     [accessory setEditable:NO];
     [accessory setDrawsBackground:NO];
     [versionInfo setAccessoryView:accessory];
@@ -89,11 +89,10 @@
 
 - (void)showUnsupportedMachineMessage
 {
-    NSAlert *alert = [NSAlert alertWithMessageText:Str(@"UnsupportedMachine")
-                                     defaultButton:Str(@"OhISee")
-                                   alternateButton:nil 
-                                       otherButton:nil 
-                         informativeTextWithFormat:@""];
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = Str(@"UnsupportedMachine");
+    alert.informativeText = @"";
+    [alert addButtonWithTitle:Str(@"OhISee")];
     [alert runModal];
 }
 
@@ -105,13 +104,13 @@
     for (NSString *taskName in taskList)
         [descriptionText appendFormat:@"%@\n", taskName];
 
-    NSAlert *alert = [NSAlert alertWithMessageText:Str(messageKey)
-                                     defaultButton:@"OK"
-                                   alternateButton:@"Why?"
-                                       otherButton:nil
-                         informativeTextWithFormat:@"%@", descriptionText];
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = Str(messageKey);
+    alert.informativeText = descriptionText;
+    [alert addButtonWithTitle:Str(@"OK")];
+    [alert addButtonWithTitle:Str(@"Why?")];
 
-    if ([alert runModal] == NSAlertAlternateReturn)
+    if ([alert runModal] == NSAlertSecondButtonReturn)
         [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:kIntegratedOnlyMessageExplanationURL]];
 }
 

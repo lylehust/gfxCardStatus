@@ -93,7 +93,7 @@ done:
 }
 
 // update the current list of kernel tasks
-static void _procUpdate() {
+static void _procUpdate(void) {
     // we want all process entries from the kernel
     int mib[3] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     

@@ -21,7 +21,6 @@
 
 // dynamic menu items - these change
 @property (weak) IBOutlet NSMenuItem *versionItem;
-@property (weak) IBOutlet NSMenuItem *updateItem;
 @property (weak) IBOutlet NSMenuItem *preferencesItem;
 @property (weak) IBOutlet NSMenuItem *quitItem;
 @property (weak) IBOutlet NSMenuItem *visitWebsiteItem;

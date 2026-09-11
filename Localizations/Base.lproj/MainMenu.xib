@@ -651,7 +651,6 @@
         <customObject id="494" userLabel="gfxCardStatus App Delegate" customClass="gfxCardStatusAppDelegate">
             <connections>
                 <outlet property="menuController" destination="850" id="875"/>
-                <outlet property="updater" destination="661" id="664"/>
             </connections>
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
@@ -661,12 +660,6 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="openAbout:" target="850" id="867"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Update" id="658">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="checkForUpdates:" target="661" id="662"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Preferences" id="665">
@@ -729,7 +722,6 @@
                 </menuItem>
             </items>
         </menu>
-        <customObject id="661" customClass="SUUpdater"/>
         <customObject id="850" customClass="GSMenuController">
             <connections>
                 <outlet property="currentCard" destination="653" id="851"/>
@@ -743,7 +735,6 @@
                 <outlet property="quitItem" destination="649" id="856"/>
                 <outlet property="statusMenu" destination="533" id="857"/>
                 <outlet property="switchGPUs" destination="723" id="858"/>
-                <outlet property="updateItem" destination="658" id="859"/>
                 <outlet property="versionItem" destination="646" id="860"/>
                 <outlet property="visitWebsiteItem" destination="648" id="876"/>
             </connections>

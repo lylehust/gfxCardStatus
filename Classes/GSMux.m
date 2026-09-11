@@ -344,14 +344,12 @@ static void dumpState(io_connect_t connect)
             // the main thread so the menu bar UI doesn't freeze while waiting.
             // The menu is updated optimistically (like before), and the display
             // reconfiguration callback corrects it once the switch completes.
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-                // Hold up a sec!
-                sleep(1);
-                
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)),
+                           dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
                 BOOL integrated = self.isUsingIntegratedGPU;
                 if ((mode == GSSwitcherModeForceIntegrated && !integrated)
                     || (mode == GSSwitcherModeForceDiscrete && integrated))
-                    forceSwitch(_switcherConnect);
+                    forceSwitch(self->_switcherConnect);
             });
             
             return ok;

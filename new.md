@@ -75,8 +75,8 @@ control, in `script/`) that wraps `xcrun notarytool`:
 
 ## Artifacts
 
-- `build/gfxCardStatus-2.7.dmg` — **notarized + stapled**, ready to distribute.
-- `/Applications/gfxCardStatus.app` — installed, Developer ID-signed,
+- `build/gfxCardStatus-2.7.1.dmg` — **notarized + stapled**, ready to distribute.
+- `/Applications/gfxCardStatus.app` — installed 2.7.1, Developer ID-signed,
   notarization ticket stapled.
 
 ## Usage
@@ -87,7 +87,7 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
     -configuration Release build
 
 # notarize + staple the DMG (helper script is local, in script/):
-./script/notarize build/gfxCardStatus-2.7.dmg
+./script/notarize build/gfxCardStatus-2.7.1.dmg
 ```
 
 ## Notes
@@ -189,3 +189,67 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
   to the raw key; other locales keep the fallback until translated).
 - Verified: Debug + Release **BUILD SUCCEEDED**, app binary contains zero
   `rac_*` symbols and no ReactiveCocoa files in the bundle.
+
+## 2026-08-17 — v2.7.1: fork-mode updates, crash fix, warning cleanup
+
+### Update checks disabled (fork mode)
+
+The fork no longer talks to the upstream project's servers and can never be
+silently replaced by an upstream build:
+
+- `gfxCardStatus-Info.plist`: `SUEnableAutomaticChecks` = `false`; removed
+  `SUFeedURL` (`https://gfx.io/appcasts/…`), `SUPublicEDKey` (upstream's key)
+  and `SUEnableSystemProfiling` (which sent machine/OS profile data to gfx.io).
+  `SU_FEED_URL`/`SU_FEED_CHANNEL` build settings removed from the project too.
+- Removed the **Check for Updates…** menu item (MainMenu.xib + `updateItem`
+  outlet/synthesis/localization) and the **Check for updates at startup**
+  checkbox (GeneralPreferencesView.xib + outlet + binding), plus the
+  `shouldCheckForUpdatesOnStartup` preference key/accessor and all
+  `SUUpdater` wiring (xib object, app-delegate outlet, background check,
+  notification observer, the old v2.5b1 appcast-hack block).
+- `Sparkle.framework` is still linked/embedded but **entirely unused** — it can
+  be unlinked later (that would also drop the nested `Autoupdate.app`/`fileop`
+  from the re-signing step).
+
+### Crash fix (introduced in the previous round)
+
+- `GeneralPreferencesViewController` built its checkbox list with an **array
+  literal** — `@[prefChkStartup, prefChkUpdate, prefChkSmartIcons, prefChkGrowl]`
+  — but `prefChkGrowl` (and now `prefChkUpdate`) have **no outlet connection**
+  in the xib, so the literal raised `NSInvalidArgumentException` and would have
+  crashed as soon as Preferences was opened on the target machine. Now uses the
+  nil-terminated `initWithObjects:…, nil` form, and the dead `prefChkGrowl` /
+  `prefChkUpdate` outlets are gone. The start-at-login side effect is now
+  applied only for `prefChkStartup`.
+
+### Warning / API cleanup
+
+- `GSMux.m`: forced-switch settle delay uses `dispatch_after` instead of
+  `sleep(1)` inside a dispatch block (no blocked pool thread), and the block
+  references `self->_switcherConnect` explicitly (`-Wimplicit-retain-self`).
+- `GSProcess.m`: `_procUpdate()` → `_procUpdate(void)` (`-Wstrict-prototypes`).
+- `PreferencesWindowController.m`: `NSWindowStyleMaskTitled|…Closable`.
+- `GSNotifier.m`: modern `NSAlert` (`init` + properties), `textStorage` instead
+  of the input-system `insertText:`, `NSAlertSecondButtonReturn`, and localized
+  `OK` / `Why?` button titles.
+- `GSMenuController.m`: dropped deprecated `setHighlightMode:`.
+- Compiler warnings in app code: **15 → 7**, all remaining ones being
+  `LSSharedFileList*` deprecations in `GSStartup.m` (still functional on
+  Sequoia; migrating to `SMAppService` would need a macOS 13+ runtime check
+  with an LS fallback for the 10.13 deployment target).
+- `README.md`: no longer points at the upstream download badge / workspace-only
+  build instructions; notes the fork and the pod-free build.
+
+### Verification
+
+- Debug + Release **BUILD SUCCEEDED**; Release reports
+  `CFBundleShortVersionString 2.7.1`, and the built Info.plist contains no
+  update feed or public key.
+- Runtime nib harness (loads the compiled xibs with a stub owner and forces
+  autolayout): `GeneralPreferencesView` → 440×74, 2 subviews, 6 constraints, no
+  ambiguous layout, `prefChkStartup` connected; `AdvancedPreferencesView` loads
+  cleanly.
+- App installed to `/Applications` and launched (MainMenu.xib with the removed
+  Update item / SUUpdater object loads fine).
+- `build/gfxCardStatus-2.7.1.dmg` (app + `/Applications` symlink), re-signed
+  inside-out with the Developer ID certificate, notarized, stapled.

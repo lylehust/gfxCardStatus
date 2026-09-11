@@ -18,6 +18,8 @@
 "Dependencies"			= "Dependencies";
 "NoProcess"				= "None";
 "External Display"		= "External Display";
+"OK"					= "OK";
+"Why?"					= "Why?";
 "Quit"					= "Quit";
 "Close"					= "Cool!";
 "PowerSource"           = "Power Source: %%";

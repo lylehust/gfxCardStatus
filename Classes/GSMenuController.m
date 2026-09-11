@@ -27,7 +27,6 @@
 @synthesize statusMenu;
 
 @synthesize versionItem;
-@synthesize updateItem;
 @synthesize preferencesItem;
 @synthesize quitItem;
 @synthesize visitWebsiteItem;
@@ -71,7 +70,6 @@
     
     _statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [_statusItem setMenu:statusMenu];
-    [_statusItem setHighlightMode:YES];
     
     BOOL isLegacyMachine = [GSGPU isLegacyMachine];
     [switchGPUs setHidden:!isLegacyMachine];
@@ -228,7 +226,7 @@
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [versionItem setTitle:[Str(@"About") stringByReplacingOccurrencesOfString:@"%%" withString:version]];
     [visitWebsiteItem setTitle:[Str(visitWebsiteItem.title) stringByReplacingOccurrencesOfString:@"%%" withString:kApplicationWebsiteURL]];
-    NSArray *localized = [NSArray arrayWithObjects:updateItem, preferencesItem,
+    NSArray *localized = [NSArray arrayWithObjects:preferencesItem,
                           quitItem, switchGPUs, integratedOnly, discreteOnly, 
                           dynamicSwitching, dependentProcesses, processList, 
                           nil];

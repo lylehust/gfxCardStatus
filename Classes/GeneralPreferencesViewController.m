@@ -22,9 +22,7 @@
 @implementation GeneralPreferencesViewController
 
 @synthesize prefChkSmartIcons;
-@synthesize prefChkUpdate;
 @synthesize prefChkStartup;
-@synthesize prefChkGrowl;
 @synthesize prefs;
 
 #pragma mark - Initializers
@@ -47,24 +45,25 @@
 
     // The checkboxes are bound to prefs.prefsDict, so toggling one mutates
     // the dictionary without any notification. Wire up a target/action so we
-    // can persist the change and apply its side effects right away.
-    for (NSButton *checkbox in @[prefChkStartup, prefChkUpdate, prefChkSmartIcons, prefChkGrowl]) {
+    // can persist the change and apply its side effects right away. Use the
+    // nil-terminated initializer: outlets that aren't connected are nil, and an
+    // array literal would throw on a nil element.
+    NSArray *checkboxes = [[NSArray alloc] initWithObjects:prefChkStartup, prefChkSmartIcons, nil];
+    for (NSButton *checkbox in checkboxes) {
         checkbox.target = self;
         checkbox.action = @selector(prefCheckboxChanged:);
+        [checkbox setTitle:Str([checkbox title])];
     }
-    
-    NSArray *localizedButtons = [[NSArray alloc] initWithObjects:prefChkStartup, prefChkUpdate, prefChkSmartIcons, prefChkGrowl, nil];
-    for (NSButton *loc in localizedButtons)
-        [loc setTitle:Str([loc title])];
 }
 
 - (IBAction)prefCheckboxChanged:(id)sender
 {
     // The binding has already written the new value into prefsDict; persist it
     // (which also posts GSPreferencesDidChangeNotification so the menu bar icon
-    // and the updater refresh) and apply the start-at-login side effect now.
+    // refreshes) and apply the start-at-login side effect now.
     [prefs savePreferences];
-    [GSStartup loadAtStartup:prefs.shouldStartAtLogin];
+    if (sender == prefChkStartup)
+        [GSStartup loadAtStartup:prefs.shouldStartAtLogin];
 }
 
 #pragma mark - Passthrough properties

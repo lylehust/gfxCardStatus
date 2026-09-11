@@ -30,7 +30,7 @@
         return nil;
     
     NSWindow *prefsWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 300, 200)
-                                                         styleMask:(NSTitledWindowMask | NSClosableWindowMask) 
+                                                         styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable)
                                                            backing:NSBackingStoreBuffered defer:YES];
     prefsWindow.showsToolbarButton = NO;
     

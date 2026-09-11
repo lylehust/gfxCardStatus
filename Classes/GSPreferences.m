@@ -10,7 +10,6 @@
 #import "GSStartup.h"
 
 #define kShouldStartAtLoginKey                  @"shouldStartAtLogin"
-#define kShouldCheckForUpdatesOnStartupKey      @"shouldCheckForUpdatesOnStartup"
 #define kShouldUseSmartMenuBarIconsKey          @"shouldUseSmartMenuBarIcons"
 
 // This used to be called "shouldGrowl"
@@ -85,7 +84,6 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
 {
     GSLogDebug(@"Setting initial defaults...");
     
-    _prefsDict[kShouldCheckForUpdatesOnStartupKey] = @YES;
     _prefsDict[kShouldStartAtLoginKey] = @YES;
     _prefsDict[kShouldDisplayNotificationsKey] = @YES;
     _prefsDict[kShouldUseSmartMenuBarIconsKey] = @NO;
@@ -102,8 +100,8 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
     else
         GSLogDebug(@"Failed to write preferences to disk. Permissions problem in ~/Library/Preferences?");
     
-    // Let interested parties (menu bar icon, updater, login items, ...) know
-    // that the preferences changed so they can re-apply their side effects.
+    // Let interested parties (menu bar icon, login items, ...) know that the
+    // preferences changed so they can re-apply their side effects.
     [[NSNotificationCenter defaultCenter] postNotificationName:GSPreferencesDidChangeNotification
                                                         object:self];
 }
@@ -117,11 +115,6 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
 - (BOOL)boolForKey:(NSString *)key
 {
     return [_prefsDict[key] boolValue];
-}
-
-- (BOOL)shouldCheckForUpdatesOnStartup
-{
-    return [_prefsDict[kShouldCheckForUpdatesOnStartupKey] boolValue];
 }
 
 - (BOOL)shouldStartAtLogin
