@@ -75,8 +75,8 @@ control, in `script/`) that wraps `xcrun notarytool`:
 
 ## Artifacts
 
-- `build/gfxCardStatus-2.7.1.dmg` — **notarized + stapled**, ready to distribute.
-- `/Applications/gfxCardStatus.app` — installed 2.7.1, Developer ID-signed,
+- `build/gfxCardStatus-2.8.dmg` — **notarized + stapled**, ready to distribute.
+- `/Applications/gfxCardStatus.app` — installed 2.8, Developer ID-signed,
   notarization ticket stapled.
 
 ## Usage
@@ -87,7 +87,7 @@ xcodebuild -workspace gfxCardStatus.xcworkspace -scheme gfxCardStatus \
     -configuration Release build
 
 # notarize + staple the DMG (helper script is local, in script/):
-./script/notarize build/gfxCardStatus-2.7.1.dmg
+./script/notarize build/gfxCardStatus-2.8.dmg
 ```
 
 ## Notes
@@ -253,3 +253,46 @@ silently replaced by an upstream build:
   Update item / SUUpdater object loads fine).
 - `build/gfxCardStatus-2.7.1.dmg` (app + `/Applications` symlink), re-signed
   inside-out with the Developer ID certificate, notarized, stapled.
+
+## 2026-09-12 — v2.8: GitHub-releases update checker, Sparkle removed
+
+### Update notifications via this fork's own GitHub releases
+
+Installed copies now learn about new versions from
+`https://api.github.com/repos/lylehust/gfxCardStatus/releases/latest` — no
+third-party service, no signing keys, no account:
+
+- New `GSUpdateChecker`: fetches the newest release, normalises the version out
+  of the release **name or tag** (this repo's tags are hand-made, e.g.
+  `ver._2.7.1` → `2.7.1`), compares it numerically against
+  `CFBundleShortVersionString`, and picks the newest `.dmg` release asset.
+- Startup check (silent — speaks up only when a newer release exists) driven by
+  a new **Check for updates at startup** preference, default **on**.
+- **Check for Updates…** restored in the status menu, plus a **Check Now**
+  button in General preferences; both always report (new version with release
+  notes + Download/Later, up to date, or could-not-check).
+- ⚠️ When publishing a release, the **tag or release name must contain a dotted
+  version** (`v2.8`, `ver._2.8`, `Version 2.8`, …). Names without one (e.g. the
+  `macOS_15` tag) are deliberately ignored so they can't be mistaken for a
+  version.
+
+### Sparkle.framework removed
+
+- Deleted the framework, its link/embed build phases and the `SU*` Info.plist
+  keys; nothing referenced it any more. The app bundle no longer has a
+  `Frameworks` directory, re-signing is a single `codesign` call (no nested
+  `Autoupdate.app`/`fileop`), and the DMG shrank from 1.98 MB to ~162 KB.
+
+### Verification
+
+- `GSUpdateChecker` harness: version comparisons
+  (`ver._2.7.1` == `2.7.1`, `Ver_2.7` < `2.7.1`, `2.8` > `2.7.1`,
+  `2.7.10` > `2.7.9`, `macOS_15` ignored) plus a live fetch of this repo
+  (parsed `2.7.1` and the DMG download URL). Nib harness: prefs view loads at
+  440×106 with 3 checkboxes + button, 12 constraints, no ambiguity.
+- Release 2.8 built (CFBundleVersion 5485, no `SU*` keys, no Sparkle anywhere),
+  Developer ID signed, notarized (accepted), stapled;
+  Gatekeeper `accepted (Notarized Developer ID)` for both the installed app and
+  the app inside the DMG.
+- Note: the App Store Connect key was rotated, so `script/notarize` (local,
+  untracked) now defaults to the current key file (same issuer).

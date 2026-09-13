@@ -36,11 +36,5 @@
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
-	<!-- This fork ships without an update feed: no automatic update checks, no
-	     network contact with the upstream project's servers, and no system
-	     profiling. Re-add SUFeedURL/SUPublicEDKey here if you ever host your
-	     own appcast. -->
-	<key>SUEnableAutomaticChecks</key>
-	<false/>
 </dict>
 </plist>
