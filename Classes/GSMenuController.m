@@ -13,6 +13,7 @@
 #import "GSMux.h"
 #import "GSNotifier.h"
 #import "GSProcess.h"
+#import "GSUpdateChecker.h"
 
 
 @interface GSMenuController (Internal)
@@ -27,6 +28,7 @@
 @synthesize statusMenu;
 
 @synthesize versionItem;
+@synthesize updateItem;
 @synthesize preferencesItem;
 @synthesize quitItem;
 @synthesize visitWebsiteItem;
@@ -122,6 +124,11 @@
 {
     [[NSApplication sharedApplication] orderFrontStandardAboutPanel:nil];
     [NSApp activateIgnoringOtherApps:YES];
+}
+
+- (IBAction)checkForUpdates:(id)sender
+{
+    [GSUpdateChecker checkWithUserInteraction];
 }
 
 - (IBAction)openPreferences:(id)sender
@@ -226,7 +233,7 @@
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [versionItem setTitle:[Str(@"About") stringByReplacingOccurrencesOfString:@"%%" withString:version]];
     [visitWebsiteItem setTitle:[Str(visitWebsiteItem.title) stringByReplacingOccurrencesOfString:@"%%" withString:kApplicationWebsiteURL]];
-    NSArray *localized = [NSArray arrayWithObjects:preferencesItem,
+    NSArray *localized = [NSArray arrayWithObjects:updateItem, preferencesItem,
                           quitItem, switchGPUs, integratedOnly, discreteOnly, 
                           dynamicSwitching, dependentProcesses, processList, 
                           nil];

@@ -23,6 +23,7 @@ extern NSString * const GSPreferencesDidChangeNotification;
 - (void)setDefaults;
 - (void)savePreferences;
 
+- (BOOL)shouldCheckForUpdatesOnStartup;
 - (BOOL)shouldStartAtLogin;
 - (BOOL)shouldDisplayNotifications;
 - (BOOL)shouldUseSmartMenuBarIcons;

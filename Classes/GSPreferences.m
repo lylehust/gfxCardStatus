@@ -10,6 +10,7 @@
 #import "GSStartup.h"
 
 #define kShouldStartAtLoginKey                  @"shouldStartAtLogin"
+#define kShouldCheckForUpdatesOnStartupKey      @"shouldCheckForUpdatesOnStartup"
 #define kShouldUseSmartMenuBarIconsKey          @"shouldUseSmartMenuBarIcons"
 
 // This used to be called "shouldGrowl"
@@ -84,6 +85,7 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
 {
     GSLogDebug(@"Setting initial defaults...");
     
+    _prefsDict[kShouldCheckForUpdatesOnStartupKey] = @YES;
     _prefsDict[kShouldStartAtLoginKey] = @YES;
     _prefsDict[kShouldDisplayNotificationsKey] = @YES;
     _prefsDict[kShouldUseSmartMenuBarIconsKey] = @NO;
@@ -115,6 +117,11 @@ NSString * const GSPreferencesDidChangeNotification = @"GSPreferencesDidChangeNo
 - (BOOL)boolForKey:(NSString *)key
 {
     return [_prefsDict[key] boolValue];
+}
+
+- (BOOL)shouldCheckForUpdatesOnStartup
+{
+    return [_prefsDict[kShouldCheckForUpdatesOnStartupKey] boolValue];
 }
 
 - (BOOL)shouldStartAtLogin

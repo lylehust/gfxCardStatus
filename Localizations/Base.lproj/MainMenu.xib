@@ -662,6 +662,12 @@
                         <action selector="openAbout:" target="850" id="867"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Update" id="658">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="checkForUpdates:" target="850" id="662"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Preferences" id="665">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -735,6 +741,7 @@
                 <outlet property="quitItem" destination="649" id="856"/>
                 <outlet property="statusMenu" destination="533" id="857"/>
                 <outlet property="switchGPUs" destination="723" id="858"/>
+                <outlet property="updateItem" destination="658" id="859"/>
                 <outlet property="versionItem" destination="646" id="860"/>
                 <outlet property="visitWebsiteItem" destination="648" id="876"/>
             </connections>

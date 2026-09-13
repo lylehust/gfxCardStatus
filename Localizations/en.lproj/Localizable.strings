@@ -65,3 +65,14 @@
 /* Miscellaneous notifications */
 "Can'tSwitchToIntegratedOnlySingular" = "You can't switch to Integrated Only while the following item is running:";
 "Can'tSwitchToIntegratedOnlyPlural" = "You can't switch to Integrated Only while the following items are running:";
+
+/* Update checker (GitHub releases) */
+"CheckNow"                  = "Check Now";
+"UpdateAvailable"           = "gfxCardStatus %@ is available";
+"UpdateAvailableMessage"    = "You are running gfxCardStatus %2$@. Version %1$@ can be downloaded from the GitHub releases page.";
+"UpToDate"                  = "You're up to date";
+"UpToDateMessage"           = "gfxCardStatus %@ is the latest version.";
+"UpdateCheckFailed"         = "Couldn't check for updates";
+"UpdateCheckFailedMessage"  = "gfxCardStatus couldn't reach the GitHub releases page. Check your internet connection and try again.";
+"Download"                  = "Download";
+"Later"                     = "Later";

@@ -13,6 +13,7 @@
 #import "GSProcess.h"
 #import "GSMux.h"
 #import "GSNotifier.h"
+#import "GSUpdateChecker.h"
 
 #define kHasSeenOneTimeNotificationKey @"hasSeenVersionTwoMessage"
 
@@ -72,6 +73,10 @@
         [[GSNotifier sharedInstance] showOneTimeNotification];
         [_prefs setBool:YES forKey:kHasSeenOneTimeNotificationKey];
     }
+
+    // Look for a newer release on GitHub. Silent unless there is one.
+    if ([_prefs shouldCheckForUpdatesOnStartup])
+        [GSUpdateChecker checkInBackground];
 }
 
 #pragma mark - Termination Notifications

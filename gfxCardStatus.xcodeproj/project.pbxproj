@@ -35,6 +35,7 @@
 		A1ED2D1B158859DE00B99CDE /* GSStartup.m in Sources */ = {isa = PBXBuildFile; fileRef = A1ED2D1A158859DE00B99CDE /* GSStartup.m */; };
 		A1ED2D1F15885D6A00B99CDE /* GSNotifier.m in Sources */ = {isa = PBXBuildFile; fileRef = A1ED2D1E15885D6900B99CDE /* GSNotifier.m */; };
 		A1ED2D22158860FB00B99CDE /* GSMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = A1ED2D21158860FA00B99CDE /* GSMenuController.m */; };
+		0B5E100127000000000000A3 /* GSUpdateChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B5E100127000000000000A2 /* GSUpdateChecker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -126,6 +127,8 @@
 		A1ED2D20158860F900B99CDE /* GSMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSMenuController.h; sourceTree = "<group>"; };
 		A1ED2D21158860FA00B99CDE /* GSMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GSMenuController.m; sourceTree = "<group>"; };
 		A1F4FB0F13C6D58B002D38D5 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
+		0B5E100127000000000000A1 /* GSUpdateChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GSUpdateChecker.h; sourceTree = "<group>"; };
+		0B5E100127000000000000A2 /* GSUpdateChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GSUpdateChecker.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,6 +244,8 @@
 				A17CE49913B07C3700E5D50F /* GSProcess.m */,
 				A1ED2D19158859DE00B99CDE /* GSStartup.h */,
 				A1ED2D1A158859DE00B99CDE /* GSStartup.m */,
+				0B5E100127000000000000A1 /* GSUpdateChecker.h */,
+				0B5E100127000000000000A2 /* GSUpdateChecker.m */,
 			);
 			name = "System Utils";
 			sourceTree = "<group>";
@@ -444,6 +449,7 @@
 				A1ED2D1B158859DE00B99CDE /* GSStartup.m in Sources */,
 				A1ED2D1F15885D6A00B99CDE /* GSNotifier.m in Sources */,
 				A1ED2D22158860FB00B99CDE /* GSMenuController.m in Sources */,
+				0B5E100127000000000000A3 /* GSUpdateChecker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

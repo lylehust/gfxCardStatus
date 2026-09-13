@@ -10,17 +10,38 @@
             <connections>
                 <outlet property="prefChkSmartIcons" destination="35" id="39"/>
                 <outlet property="prefChkStartup" destination="4" id="13"/>
+                <outlet property="prefChkUpdate" destination="2" id="11"/>
                 <outlet property="view" destination="1" id="8"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="1">
-            <rect key="frame" x="0.0" y="0.0" width="440" height="74"/>
+            <rect key="frame" x="0.0" y="0.0" width="440" height="106"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
+                <button focusRingType="none" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2">
+                    <rect key="frame" x="18" y="20" width="292" height="18"/>
+                    <buttonCell key="cell" type="check" title="PrefUpdate" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" focusRingType="none" inset="2" id="7">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <binding destination="23" name="value" keyPath="selection.shouldCheckForUpdatesOnStartup" id="27"/>
+                    </connections>
+                </button>
+                <button translatesAutoresizingMaskIntoConstraints="NO" id="60">
+                    <rect key="frame" x="318" y="17" width="104" height="24"/>
+                    <buttonCell key="cell" type="push" title="CheckNow" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="61">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="checkForUpdatesNow:" target="-2" id="62"/>
+                    </connections>
+                </button>
                 <button focusRingType="none" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4">
-                    <rect key="frame" x="18" y="12" width="404" height="18"/>
+                    <rect key="frame" x="18" y="44" width="404" height="18"/>
                     <buttonCell key="cell" type="check" title="PrefStartup" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" focusRingType="none" inset="2" id="5">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -30,7 +51,7 @@
                     </connections>
                 </button>
                 <button focusRingType="none" imageHugsTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="35">
-                    <rect key="frame" x="18" y="36" width="404" height="18"/>
+                    <rect key="frame" x="18" y="68" width="404" height="18"/>
                     <buttonCell key="cell" type="check" title="SmartMenuBarIcons" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" focusRingType="none" inset="2" id="36">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -52,6 +73,12 @@
                 <constraint firstItem="4" firstAttribute="top" secondItem="35" secondAttribute="bottom" constant="6" symbolic="YES" id="BB9-NH-anN"/>
                 <constraint firstItem="4" firstAttribute="leading" secondItem="35" secondAttribute="leading" id="Pz0-nl-Edf"/>
                 <constraint firstItem="4" firstAttribute="trailing" secondItem="35" secondAttribute="trailing" id="fTH-cT-UvW"/>
+                <constraint firstItem="2" firstAttribute="top" secondItem="4" secondAttribute="bottom" constant="6" symbolic="YES" id="Upd-Top-01"/>
+                <constraint firstItem="2" firstAttribute="leading" secondItem="35" secondAttribute="leading" id="Upd-Lead-01"/>
+                <constraint firstItem="2" firstAttribute="trailing" secondItem="60" secondAttribute="leading" constant="-8" id="Upd-Trail-01"/>
+                <constraint firstItem="60" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" constant="-20" id="Upd-BtnTr-01"/>
+                <constraint firstItem="60" firstAttribute="centerY" secondItem="2" secondAttribute="centerY" id="Upd-BtnCY-01"/>
+                <constraint firstItem="60" firstAttribute="width" constant="104" id="Upd-BtnW-01"/>
             </constraints>
             <point key="canvasLocation" x="70" y="136"/>
         </customView>

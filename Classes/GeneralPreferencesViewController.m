@@ -11,18 +11,21 @@
 #import "GSPreferences.h"
 #import "GSStartup.h"
 #import "GSGPU.h"
+#import "GSUpdateChecker.h"
 
 #define kGeneralPreferencesName         @"General"
 
 @interface GeneralPreferencesViewController (Internal)
 - (BOOL)isLegacyMachine;
 - (IBAction)prefCheckboxChanged:(id)sender;
+- (IBAction)checkForUpdatesNow:(id)sender;
 @end
 
 @implementation GeneralPreferencesViewController
 
 @synthesize prefChkSmartIcons;
 @synthesize prefChkStartup;
+@synthesize prefChkUpdate;
 @synthesize prefs;
 
 #pragma mark - Initializers
@@ -48,12 +51,17 @@
     // can persist the change and apply its side effects right away. Use the
     // nil-terminated initializer: outlets that aren't connected are nil, and an
     // array literal would throw on a nil element.
-    NSArray *checkboxes = [[NSArray alloc] initWithObjects:prefChkStartup, prefChkSmartIcons, nil];
+    NSArray *checkboxes = [[NSArray alloc] initWithObjects:prefChkStartup, prefChkUpdate, prefChkSmartIcons, nil];
     for (NSButton *checkbox in checkboxes) {
         checkbox.target = self;
         checkbox.action = @selector(prefCheckboxChanged:);
         [checkbox setTitle:Str([checkbox title])];
     }
+}
+
+- (IBAction)checkForUpdatesNow:(id)sender
+{
+    [GSUpdateChecker checkWithUserInteraction];
 }
 
 - (IBAction)prefCheckboxChanged:(id)sender
